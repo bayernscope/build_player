@@ -16,7 +16,8 @@ window.BUILDER_DATA = {
 
   /* ---------- Game rules ---------- */
   // Every step shows ALL players; a player can only be used once per build.
-  showScores: true,         // show each player's score on the choice buttons
+  showScores: false,        // true = show each player's score on the choice buttons
+   shuffleOptions: true,     // true = players in random order at each step; false = best first
 
   /* ---------- Kit & cartoon colours ---------- */
   kit: {
