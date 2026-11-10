@@ -164,14 +164,9 @@ window.BUILDER_DATA = {
         { id: "karl", name: "Lennart Karl", short: "Karl", number: 42, tags: ["academy"], stats: { leftFoot: 74, rightFoot: 56, pace: 73, shooting: 74, passing: 75, vision: 75, dribbling: 84, heading: 39, defending: 33, stamina: 69 } },
         { id: "boey", name: "Sacha Boey", short: "Boey", number: "", tags: [], stats: { leftFoot: 55, rightFoot: 66, pace: 70, shooting: 55, passing: 73, vision: 58, dribbling: 73, heading: 63, defending: 76, stamina: 71 } },
         { id: "ndiaye", name: "Bara Sapoko Ndiaye", short: "Ndiaye", number: "", tags: [], stats: { leftFoot: 51, rightFoot: 63, pace: 81, shooting: 55, passing: 66, vision: 62, dribbling: 70, heading: 55, defending: 62, stamina: 45 } },  // your values (not checked)
-        { id: "binder", name: "Tim Binder", short: "Binder", number: "", tags: [], stats: { leftFoot: 58, rightFoot: 46, pace: 70, shooting: 55, passing: 55, vision: 58, dribbling: 65, heading: 50, defending: 36, stamina: 55 } },  // your values (not checked)
-        { id: "santosdaiber", name: "David Santos Daiber", short: "Santos Daiber", number: "", tags: [], stats: { leftFoot: 46, rightFoot: 58, pace: 57, shooting: 49, passing: 65, vision: 60, dribbling: 61, heading: 56, defending: 58, stamina: 55 } },  // your values (not checked)
-        { id: "kiala", name: "Cassiano Kiala", short: "Kiala", number: "", tags: [], stats: { leftFoot: 22, rightFoot: 34, pace: 58, shooting: 26, passing: 40, vision: 36, dribbling: 40, heading: 63, defending: 64, stamina: 38 } },  // your values (not checked)
-        { id: "cardozo", name: "Maycon Cardozo", short: "Cardozo", number: "", tags: [], stats: { leftFoot: 44, rightFoot: 56, pace: 66, shooting: 52, passing: 52, vision: 56, dribbling: 67, heading: 48, defending: 35, stamina: 49 } },  // your values (not checked)
         { id: "neuer", name: "Manuel Neuer", short: "Neuer", number: 1, tags: [], stats: { leftFoot: 53, rightFoot: 59, pace: 32, shooting: 28, passing: 63, vision: 68, dribbling: 51, heading: 25, defending: 19, stamina: 43 } },  // your values (not checked)
         { id: "urbig", name: "Jonas Urbig", short: "Urbig", number: "", tags: [], stats: { leftFoot: 43, rightFoot: 49, pace: 32, shooting: 20, passing: 54, vision: 48, dribbling: 37, heading: 13, defending: 12, stamina: 24 } },  // your values (not checked)
         { id: "ulreich", name: "Sven Ulreich", short: "Ulreich", number: 26, tags: [], stats: { leftFoot: 16, rightFoot: 34, pace: 41, shooting: 19, passing: 32, vision: 42, dribbling: 38, heading: 8, defending: 14, stamina: 29 } },  // your values (not checked)
-        { id: "bartl", name: "Jannis Bärtl", short: "Bärtl", number: "", tags: [], stats: { leftFoot: 16, rightFoot: 28, pace: 33, shooting: 15, passing: 27, vision: 41, dribbling: 31, heading: 10, defending: 11, stamina: 31 } },  // your values (not checked)
       ]
     }
   }
