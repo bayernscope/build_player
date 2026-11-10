@@ -5,7 +5,7 @@
   const K = D.kit;
   const ATTRS = D.attributes;
   const STAT_KEYS = ATTRS.map(a => a.key);
-
+ 
   /* ---------- Card geometry (1080 x 1350, Instagram 4:5) ---------- */
   const W = 1080, H = 1350, PX = 320, PY = 262, S = 1.1;
   const toCard = (x, y) => [PX + x * S, PY + y * S];
@@ -17,7 +17,7 @@
     pace: [268, 432], dribbling: [232, 630], leftFoot: [262, 742]
   };
   const GREY = 'fill="#39415a" stroke="#5f6b8a" stroke-width="2" stroke-dasharray="6 5"';
-
+ 
   /* ---------- State ---------- */
   let st;
   function reset(mode) {
@@ -25,25 +25,37 @@
            history: [], picks: {}, number: "", pop: null };
   }
   reset();
-
+ 
   const players = () => (st.mode ? D.modes[st.mode].players : []);
   const byId = id => players().find(p => p.id === id);
   const used = id => Object.values(st.picks).includes(id);
   const stepIndex = () => st.history.length;
   const pos = () => D.positions.find(p => p.id === st.position);
-
+ 
   /* ---------- Helpers ---------- */
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     const initials = n => n.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
   const fit = (text, maxW, base) => Math.min(base, Math.floor(maxW / (String(text).length * 0.6)));
-
+ 
   // All players, best first for this attribute; players already used go to the bottom (disabled)
+  // Players for a step: random order (kept while on that step) or best first; used players at the bottom
   function optionsFor(key) {
-    const sorted = players().slice().sort((a, b) => b.stats[key] - a.stats[key]);
-    return sorted.filter(p => !used(p.id)).concat(sorted.filter(p => used(p.id)));
+    let list;
+    if (D.shuffleOptions) {
+      st.shuffle = st.shuffle || {};
+      if (!st.shuffle[key]) {
+        const ids = players().map(p => p.id);
+        for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+        st.shuffle[key] = ids;
+      }
+      list = st.shuffle[key].map(byId);
+    } else {
+      list = players().slice().sort((a, b) => b.stats[key] - a.stats[key]);
+    }
+    return list.filter(p => !used(p.id)).concat(list.filter(p => used(p.id)));
   }
   const usedFor = id => { const k = Object.keys(st.picks).find(k => st.picks[k] === id); return k ? ATTRS.find(a => a.key === k).label : ""; };
-
+ 
   /* ---------- Rating ---------- */
   /* ---------- Trained model (model.js, made by training/train_model.py) ----------
      rating = base + sum(weight x attribute); each position has its own weights,
@@ -56,7 +68,7 @@
     const base = own ? own.intercept : (M.shared.base[code] || 0);
     return base + coef.reduce((t, w, i) => t + w * x[i], 0);
   }
-
+ 
   function computeRating() {
     const M = window.BUILDER_MODEL;
     if (M && pos() && STAT_KEYS.every(k => st.picks[k])) {
@@ -85,7 +97,7 @@
     return D.badges.filter(b => ids.filter(id => (byId(id).tags || []).includes(b.tag)).length >= b.min);
   }
   const tierFor = v => (D.tiers.find(t => v >= t.min) || {}).label || "";
-
+ 
   /* Card code: 20 codes per rating (60-99). The same build always gets the same code. */
   const CODES = atob(window.BUILDER_CODES).split(",");
   const PER = CODES.length / 40;
@@ -95,8 +107,8 @@
     let h = 0; for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     return CODES[(R.value - 60) * PER + (h % PER)];
   }
-
-
+ 
+ 
   /* ---------- Cartoon player (local coords 400 x 780) ---------- */
   function playerSVG(opt) {
     const on = k => !!st.picks[k];
@@ -124,14 +136,14 @@
       <pattern id="loz" width="7" height="9" patternUnits="userSpaceOnUse"><rect width="7" height="9" fill="#fff"/><polygon points="3.5,0 7,4.5 3.5,9 0,4.5" fill="${K.badgeBlue || "#1f63b8"}"/></pattern>
       <clipPath id="badgeLow"><path d="M-15 1 L15 1 L15 16 L-15 16 Z"/></clipPath></defs>
       <ellipse cx="200" cy="760" rx="175" ry="20" fill="#ffffff" opacity="0.07"/>`;
-
+ 
     // Ball – shooting
     s += wrap("shooting", on("shooting")
       ? `<circle cx="62" cy="716" r="36" fill="#fff" stroke="#1c1c1c" stroke-width="3"/>
          <polygon points="62,703 74,712 70,726 54,726 50,712" fill="#1c1c1c"/>
          <path d="M62 703 L62 681 M74 712 L95 705 M70 726 L83 744 M54 726 L41 744 M50 712 L29 705" stroke="#1c1c1c" stroke-width="3"/>`
       : `<circle cx="62" cy="716" r="36" ${GREY}/>`);
-
+ 
     // Thighs + shorts – pace
     const thighs = c => `<rect x="147" y="470" width="42" height="92" rx="14" ${c}/><rect x="211" y="470" width="42" height="92" rx="14" ${c}/>`;
     const shortsPath = "M132 398 L268 398 L281 502 L208 507 L200 468 L192 507 L119 502 Z";
@@ -143,7 +155,7 @@
          <path d="M132 401 L268 401" stroke="${K.trim}" stroke-width="3" opacity="0.8"/>
          <text x="240" y="490" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="34" fill="${K.numberColor}">${esc(number)}</text>`
       : thighs(GREY) + `<path d="${shortsPath}" ${GREY}/>`);
-
+ 
     // Socks – dribbling
     const sock = x => on("dribbling")
       ? `<rect x="${x}" y="553" width="40" height="166" rx="10" fill="${K.socks}"/>
@@ -153,7 +165,7 @@
          <rect x="${x}" y="692" width="40" height="27" fill="#000" opacity="0.07"/>`
       : `<rect x="${x}" y="553" width="40" height="166" rx="10" ${GREY}/>`;
     s += wrap("dribbling", sock(149) + sock(211));
-
+ 
     // Boots – right foot (viewer left), left foot (viewer right, mirrored)
     const boot = k => {
       const d = "M150 710 L190 710 Q194 734 191 752 L118 754 Q110 736 130 729 Q146 722 150 710 Z";
@@ -164,7 +176,7 @@
     };
     s += wrap("rightFoot", boot("rightFoot"));
     s += wrap("leftFoot", boot("leftFoot"));
-
+ 
     // Arms – defending (player's right = viewer left), passing (player's left, mirrored)
     const arm = k => {
       const sleeve = "M118 212 L140 204 L130 282 L86 292 Q90 246 118 212 Z";
@@ -179,10 +191,10 @@
     };
     s += wrap("defending", arm("defending"));
     s += wrap("passing", arm("passing"));
-
+ 
     // Neck (vision group, under the shirt)
     s += wrap("vision", `<rect x="183" y="156" width="34" height="42" rx="9" ${on("vision") ? `fill="${skin}"` : GREY}/>`);
-
+ 
     // Torso – stamina
     const torso = "M156 186 L244 186 L282 212 L270 405 L130 405 L118 212 Z";
     s += wrap("stamina", on("stamina")
@@ -195,7 +207,7 @@
          <path d="M173 193 Q200 216 227 193" fill="none" stroke="${gold}" stroke-width="2.5" stroke-linecap="round"/>
          ${chestGraphics()}`
       : `<path d="${torso}" ${GREY}/>`);
-
+ 
     // Head + eyes – vision, hair – heading
     const c = on("vision") ? `fill="${skin}"` : GREY;
     s += wrap("vision", `<ellipse cx="150" cy="115" rx="9" ry="15" ${c}/><ellipse cx="250" cy="115" rx="9" ry="15" ${c}/><ellipse cx="200" cy="110" rx="50" ry="60" ${c}/>`
@@ -210,7 +222,7 @@
     s += wrap("heading", on("heading") ? `<path d="${hairPath}" fill="${hair}"/>` : `<path d="${hairPath}" ${GREY}/>`);
     return `<g transform="translate(${PX} ${PY}) scale(${S})">${s}</g>`;
   }
-
+ 
   /* ---------- Full card ---------- */
   function cardSVG(opt = {}) {
     const mode = st.mode ? D.modes[st.mode] : null;
@@ -227,7 +239,7 @@
       <rect width="${W}" height="${H}" fill="url(#bg)"/>
       <rect width="${W}" height="${H}" fill="url(#rh)"/>
       <circle cx="540" cy="700" r="460" fill="url(#glow)"/>`;
-
+ 
     // Header
     s += `<text x="44" y="78" font-size="26" font-weight="700" letter-spacing="7" fill="#ff8da1">BUILD YOUR</text>
       <text x="40" y="150" font-size="${fit(mode ? mode.title : "PLAYER", 780, 78)}" font-family="Arial Black, Arial, sans-serif" font-weight="900" fill="#fff">${esc(mode ? mode.title : "PLAYER")}</text>`;
@@ -240,10 +252,10 @@
       s += `<rect x="44" y="220" width="${w}" height="50" rx="25" fill="#ffd34d"/>
         <text x="${44 + w / 2}" y="256" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="29" letter-spacing="5" fill="#3a2600">${esc(code)}</text>`;
     }
-
+ 
     // Player
     s += playerSVG(opt);
-
+ 
     // Callouts
     const block = (k, i, side, n) => {
       const top = 340, bottom = 1130;
@@ -267,7 +279,7 @@
     };
     LEFT_COL.forEach((k, i) => (s += block(k, i, "L", LEFT_COL.length)));
     RIGHT_COL.forEach((k, i) => (s += block(k, i, "R", RIGHT_COL.length)));
-
+ 
     // Footer
     s += `<line x1="40" y1="1262" x2="${W - 40}" y2="1262" stroke="#fff" stroke-opacity="0.15" stroke-width="2"/>
       <text x="40" y="1308" font-size="20" fill="#aab3cc">${esc(D.disclaimer)}</text>
@@ -275,7 +287,7 @@
     </svg>`;
     return s;
   }
-
+ 
   /* ---------- Panel UI ---------- */
   const $ = sel => document.querySelector(sel);
   const avatar = p => p.photo
@@ -285,7 +297,7 @@
     const keys = Object.entries(p.weights).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => ATTRS.find(a => a.key === k).label);
     return `<button class="pos${st.position === p.id ? " on" : ""}" data-pos="${p.id}" ${st.number === "" ? "disabled" : ""}><b>${esc(p.id)}</b><strong>${esc(p.label)}</strong><span>Key: ${esc(keys.join(", "))}</span></button>`;
   }).join("");
-
+ 
   const numberInput = () => `<label class="name">Enter the number of your player (0-99)
       <input id="num" type="text" inputmode="numeric" maxlength="2" placeholder="e.g. 10" value="${esc(st.number)}"></label>`;
   function bindNumber() {
@@ -297,7 +309,7 @@
       document.querySelectorAll("[data-pos]").forEach(b => (b.disabled = st.number === ""));
     });
   }
-
+ 
   function render() {
     $("#card").innerHTML = cardSVG();
     const panel = $("#panel");
@@ -345,7 +357,7 @@
     bindNumber();
     st.pop = null;
   }
-
+ 
   $("#panel").addEventListener("click", async e => {
     const b = e.target.closest("button"); if (!b || b.disabled) return;
     if (b.dataset.mode) { reset(b.dataset.mode); }
@@ -367,7 +379,7 @@
     }
     render();
   });
-
+ 
   /* ---------- Export ---------- */
   async function renderPNG() {
     const svg = cardSVG({ exporting: true });
@@ -396,8 +408,9 @@
       msg.textContent = "Couldn't create the image: " + (err && err.message ? err.message : err);
     }
   }
-
+ 
   document.title = D.siteTitle;
   render();
   window.__builder = { get state() { return st; }, renderPNG, cardCode, computeRating, setState: o => { Object.assign(st, o); render(); } };
 })();
+ 
