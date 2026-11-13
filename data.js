@@ -11,7 +11,7 @@ window.BUILDER_DATA = {
   /* ---------- General texts ---------- */
   siteTitle: "Build Your Bayern Player",
   clubName: "FC Bayern",
-  siteUrl: "bayernscope.github.io",          // shown on the shared image
+  siteUrl: "x.com/bayernscopehq",          // shown on the shared image
   disclaimer: "Fan-made for fun · Not affiliated with FC Bayern München",
 
   /* ---------- Game rules ---------- */
